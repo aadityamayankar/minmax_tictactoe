@@ -3,7 +3,7 @@ from random import choice
 import platform
 import time
 from os import system
-
+import speech_recognition as sr
 
 HUMAN = -1
 COMP = +1
@@ -210,6 +210,8 @@ def human_turn(c_choice, h_choice):
     :param h_choice: human's choice X or O
     :return:
     """
+    recognizer = sr.Recognizer()
+    mic = sr.Microphone(device_index=1)
     depth = len(empty_cells(board))
     if depth == 0 or game_over(board):
         return
@@ -228,7 +230,11 @@ def human_turn(c_choice, h_choice):
 
     while move < 1 or move > 9:
         try:
-            move = int(input('Use numpad (1..9): '))
+            print('Use numpad(1..9):')
+            response = recognize_speech_from_mic(recognizer,mic)
+            move = int(response['transcription'])
+            print(move)
+            # move = int(input('Use numpad (1..9): '))
             coord = moves[move]
             can_move = set_move(coord[0], coord[1], HUMAN)
 
@@ -246,6 +252,8 @@ def main():
     """
     Main function that calls all functions
     """
+    recognizer = sr.Recognizer()
+    mic = sr.Microphone(device_index=1)
     clean()
     h_choice = ''  # X or O
     c_choice = ''  # X or O
@@ -254,8 +262,10 @@ def main():
     # Human chooses X or O to play
     while h_choice != 'O' and h_choice != 'X':
         try:
-            print('')
-            h_choice = input('Choose X or O\nChosen: ').upper()
+            print('\nChoose X or O:\n')
+            response = recognize_speech_from_mic(recognizer, mic)
+            h_choice = response['transcription'].upper()
+            print('Chosen: ',h_choice)
         except (EOFError, KeyboardInterrupt):
             print('Bye')
             exit()
@@ -272,7 +282,14 @@ def main():
     clean()
     while first != 'Y' and first != 'N':
         try:
-            first = input('First to start?[y/n]: ').upper()
+            print('First to start?[yes/no]: ')
+            response = recognize_speech_from_mic(recognizer,mic)
+            if response['transcription'].upper() == 'YES':
+                first = 'Y'
+            else:
+                first='N'
+            # first = response['transcription'].upper()
+            print(first)
         except (EOFError, KeyboardInterrupt):
             print('Bye')
             exit()
@@ -306,6 +323,36 @@ def main():
 
     exit()
 
+
+def recognize_speech_from_mic(recognizer, microphone):
+
+    if not isinstance(recognizer, sr.Recognizer):
+        raise TypeError("`recognizer` must be `Recognizer` instance")
+
+    if not isinstance(microphone, sr.Microphone):
+        raise TypeError("`microphone` must be `Microphone` instance")
+
+    with microphone as source:
+        recognizer.adjust_for_ambient_noise(source) 
+        audio = recognizer.listen(source)
+
+    response = {
+        "success": True,
+        "error": None,
+        "transcription": None
+    }
+
+    try:
+        response["transcription"] = recognizer.recognize_google(audio)
+    except sr.RequestError:
+        # API was unreachable or unresponsive
+        response["success"] = False
+        response["error"] = "API unavailable/unresponsive"
+    except sr.UnknownValueError:
+        # speech was unintelligible
+        response["error"] = "Unable to recognize speech"
+
+    return response
 
 if __name__ == '__main__':
     main()
