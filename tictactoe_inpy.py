@@ -230,11 +230,11 @@ def human_turn(c_choice, h_choice):
 
     while move < 1 or move > 9:
         try:
-            print('Use numpad(1..9):')
+            print('Use speech(1..9):')
             response = recognize_speech_from_mic(recognizer,mic)
             move = int(response['transcription'])
-            print(move)
-            # move = int(input('Use numpad (1..9): '))
+            print('You said: ',move)
+            time.sleep(0.5)
             coord = moves[move]
             can_move = set_move(coord[0], coord[1], HUMAN)
 
@@ -242,7 +242,7 @@ def human_turn(c_choice, h_choice):
                 print('Bad move')
                 move = -1
         except (EOFError, KeyboardInterrupt):
-            print('Bye')
+            print('Quitting')
             exit()
         except (KeyError, ValueError):
             print('Bad choice')
@@ -255,9 +255,9 @@ def main():
     recognizer = sr.Recognizer()
     mic = sr.Microphone(device_index=1)
     clean()
-    h_choice = ''  # X or O
-    c_choice = ''  # X or O
-    first = ''  # if human is the first
+    h_choice = '' 
+    c_choice = '' 
+    first = '' 
 
     # Human chooses X or O to play
     while h_choice != 'O' and h_choice != 'X':
@@ -266,8 +266,9 @@ def main():
             response = recognize_speech_from_mic(recognizer, mic)
             h_choice = response['transcription'].upper()
             print('Chosen: ',h_choice)
+            time.sleep(0.5)
         except (EOFError, KeyboardInterrupt):
-            print('Bye')
+            print('Quitting')
             exit()
         except (KeyError, ValueError):
             print('Bad choice')
@@ -286,12 +287,14 @@ def main():
             response = recognize_speech_from_mic(recognizer,mic)
             if response['transcription'].upper() == 'YES':
                 first = 'Y'
+                print('You said: YES')
+                time.sleep(0.5)
             else:
                 first='N'
-            # first = response['transcription'].upper()
-            print(first)
+                print('You said: NO')
+                time.sleep(0.5)
         except (EOFError, KeyboardInterrupt):
-            print('Bye')
+            print('Quitting')
             exit()
         except (KeyError, ValueError):
             print('Bad choice')
