@@ -11,4 +11,4 @@ To mimic the computer's moves, implimentation of the MinMax algorithm is done.
 ----------------
 
 #### Rcommend to check out the SpeechRecognition Library
-[SpeechRecognition 3.8.1](https://pypi.org/project/SpeechRecognition/)
+[SpeechRecognition 3.8.1](https://pypi.org/project/SpeechRecognition/).
